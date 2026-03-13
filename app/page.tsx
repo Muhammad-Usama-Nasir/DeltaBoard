@@ -26,7 +26,6 @@ export default function Dashboard() {
     const res = await fetch('/api/projects')
     const data = await res.json()
     setProjects(data)
-    // fetch changes for each project
     const allChanges: Record<string, Change[]> = {}
     await Promise.all(
       data.map(async (p: Project) => {
@@ -98,7 +97,6 @@ export default function Dashboard() {
     setChanges(prev => { const n = { ...prev }; delete n[project.id]; return n })
   }
 
-  // Summary stats
   const totalPending = Object.values(changes).flat().filter(c => c.status === 'Pending').length
   const totalDone = Object.values(changes).flat().filter(c => c.status === 'Done').length
   const totalValue = Object.values(changes).flat().reduce((sum, c) => sum + c.value, 0)
@@ -112,52 +110,53 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-10">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
 
       {/* Top nav */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-start sm:items-center justify-between mb-6 sm:mb-8 gap-3">
         <div>
-          <h1 className="text-xl font-medium text-gray-900">Deltaboard</h1>
-          <p className="text-sm text-gray-400 mt-0.5">{session?.user?.email}</p>
+          <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">Deltaboard</h1>
+
+          <p className="text-xs sm:text-sm text-gray-400 mt-0.5 break-all">{session?.user?.email}</p>
         </div>
         <button
           onClick={() => signOut({ callbackUrl: '/login' })}
-          className="text-xs text-gray-400 hover:text-gray-700 border border-gray-200 px-3 py-1.5 rounded-lg transition-colors"
+          className="text-xs text-gray-400 hover:text-gray-700 border border-gray-200 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
         >
           Sign out
         </button>
       </div>
 
-      {/* Summary cards */}
-      <div className="grid grid-cols-4 gap-3 mb-8">
+      {/* Summary cards — 2 col on mobile, 4 on desktop */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 sm:mb-8">
         {[
           { label: 'Projects', value: projects.length },
-          { label: 'Pending changes', value: totalPending },
+          { label: 'Pending', value: totalPending },
           { label: 'Completed', value: totalDone },
           { label: 'Total value', value: `$${totalValue.toLocaleString()}` },
         ].map(stat => (
-          <div key={stat.label} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+          <div key={stat.label} className="bg-white border border-gray-200 rounded-xl p-3 sm:p-4 shadow-sm">
             <p className="text-xs text-gray-400 mb-1">{stat.label}</p>
-            <p className="text-2xl font-medium text-gray-900">{stat.value}</p>
+            <p className="text-xl sm:text-2xl font-medium text-gray-900">{stat.value}</p>
           </div>
         ))}
       </div>
 
-      {/* Projects list */}
+      {/* Projects header */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-medium text-gray-700">Projects</h2>
+        <h2 className="text-base font-semibold text-gray-900 tracking-tight">Projects</h2>
         <button
           onClick={() => setShowAddProject(!showAddProject)}
-          className="text-xs bg-gray-900 text-white px-3 py-1.5 rounded-lg hover:bg-gray-700 transition-colors"
+          className="text-xs font-medium bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-1"
         >
-          + New project
+          <span className="text-base leading-none">+</span> New project
         </button>
       </div>
 
       {/* Add project form */}
       {showAddProject && (
-        <div className="bg-white border border-gray-200 rounded-xl p-5 mb-4 flex flex-col gap-3">
-          <div className="grid grid-cols-2 gap-3">
+        <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-5 mb-4 flex flex-col gap-3 shadow-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <input
               placeholder="Project name *"
               value={projectForm.name}
@@ -171,7 +170,7 @@ export default function Dashboard() {
               className="text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-gray-400"
             />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <select
               value={projectForm.status}
               onChange={e => setProjectForm({ ...projectForm, status: e.target.value })}
@@ -205,8 +204,9 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* Projects list */}
       {projects.length === 0 ? (
-        <div className="bg-white border border-gray-200 rounded-xl p-10 text-center">
+        <div className="bg-white border border-gray-200 rounded-xl p-10 text-center shadow-sm">
           <p className="text-sm text-gray-400">No projects yet. Create your first one above.</p>
         </div>
       ) : (
